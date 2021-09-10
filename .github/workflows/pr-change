@@ -1,0 +1,19 @@
+# Queues a deploy command for every local PR.
+
+name: Local PR Opened/Updated
+
+# By default, this is run when a PR is opened or synchronized.
+on:
+  pull_request:
+
+jobs:
+  dispatch-deploy-command:
+    if: github.repository == github.event.pull_request.head.repo.full_name # Only try to deploy local PRs
+    runs-on: ubuntu-latest
+    steps:
+    - name: Dispatch /deploy Command
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        token: ${{ secrets.DISPATCH_TOKEN }} # Same security issues as before, unfortunately
+        event-type: deploy-command # Send the deploy-command type for the repository_dispatch event
+        client-payload: '{"pull_request": ${{ toJson(github.event.pull_request) }}}' # Pass along the pull request details
